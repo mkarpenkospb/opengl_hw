@@ -16,6 +16,9 @@
 
 // Math constant and routines for OpenGL interop
 #include <glm/gtc/constants.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "opengl_shader.h"
 
@@ -137,6 +140,16 @@ int main(int, char **)
       float const time_from_start = (float)(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start_time).count() / 1000.0);
       triangle_shader.set_uniform("u_time", time_from_start);
       triangle_shader.set_uniform("u_color", color[0], color[1], color[2]);
+
+
+      auto model = glm::rotate(glm::mat4(1), glm::radians(time_from_start * 60), glm::vec3(0, 1, 0));
+      auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+      auto projection = glm::perspective<float>(90, 1, 0.1, 100);
+      auto mvp = projection * view * model;
+      //glm::mat4 identity(1.0); 
+      //mvp = identity;
+      triangle_shader.set_uniform("u_mvp", glm::value_ptr(mvp));
+
 
       // Bind triangle shader
       triangle_shader.use();

@@ -11,6 +11,7 @@ out vx_output_t v_out;
 
 uniform float u_rotation;
 uniform vec2 u_translation;
+uniform mat4 u_mvp;
 
 void main()
 {
@@ -20,5 +21,8 @@ void main()
 
     v_out.color = in_color;
 
-    gl_Position = vec4(rotated_pos.x, rotated_pos.y, in_position.z, 1.0);
+    //gl_Position = u_mvp * vec4(rotated_pos.x, rotated_pos.y, in_position.z, 1.0);
+
+    gl_Position = u_mvp * vec4(3 * rotated_pos.x, 2 * rotated_pos.y, in_position.z, 1.0);
+    //gl_Position /= gl_Position.w;
 }
