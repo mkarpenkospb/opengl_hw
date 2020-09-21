@@ -22,10 +22,10 @@ uniform float x_up_right;
 uniform float y_up_right;
 
 
-uniform vec2 c = vec2(-0.70176, -0.3842);
-uniform float r  = (1 + sqrt(1 + 4 * length(vec2(-0.70176, -0.3842)))) / 2;
+uniform vec2 c;
+uniform float r;
 uniform int u_iteration;
-uniform vec2 u_resolution = vec2(1920, 1080);
+uniform vec2 u_resolution;
 uniform float rscale;
 
 uniform sampler1D myColors;

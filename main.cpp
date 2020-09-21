@@ -47,14 +47,14 @@ Texel texturedata[] = {
 };
 
 unsigned int texturewidth = 6;
-double c_r = -0.70176, c_i =  -0.3842;
-double r = (1 + sqrt(1 + 4 * sqrt(c_r * c_r + c_i * c_i))) / 2;
 double xpos = 0, ypos  = 0;
+glm::vec2 c = glm::vec2(-0.70176, 0.3842);
+static float r = ((1 + sqrt(1 + 4 * c.length())) / 2);
 double x_down_left = -r, y_down_left = r, x_up_right = r, y_up_right = -r;
 double y_offset = 0;
 double scale_base = 9.0 / 10.0;
 double scale = 1;
-int width = 1920;
+int width = 1080;
 int height = 1080;
 
 bool follow_mouse = false;
@@ -189,6 +189,13 @@ int main(int, char **) {
 
         static float rscale = 1;
         ImGui::InputFloat("rscale", &rscale, 0.02);
+
+//        static float c_real = -0.70176;
+//        ImGui::InputFloat("real", &c_real);
+//
+//        static float c_img = -0.3842;
+//        ImGui::InputFloat("imgn", &c_img);
+
         ImGui::End();
 
         float const time_from_start = (float) (
@@ -198,6 +205,13 @@ int main(int, char **) {
 
         triangle_shader.set_uniform("u_iteration", iteration);
         triangle_shader.set_uniform("rscale", rscale);
+
+        static glm::vec2 const u_resolution = glm::vec2((float)width, (float)height);
+        triangle_shader.set_uniform("u_resolution", u_resolution[0], u_resolution[1]);
+
+        triangle_shader.set_uniform("c", c[0], c[1]);
+
+        triangle_shader.set_uniform("r", (float)r);
 
         auto model = glm::rotate(glm::mat4(1), glm::radians((float) 0), glm::vec3(0, 1, 0));
         auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 2, 0));
