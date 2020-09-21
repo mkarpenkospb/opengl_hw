@@ -11,7 +11,8 @@ find_package(glew CONFIG)
 find_package(fmt CONFIG)
 find_package(glm CONFIG)
 
-add_executable( opengl-imgui-sample
+
+add_executable(opengl-imgui-sample
                 main.cpp
                 opengl_shader.cpp
                 opengl_shader.h
@@ -23,10 +24,10 @@ add_executable( opengl-imgui-sample
                 assets/simple-shader.fs )
 
 add_custom_command(TARGET opengl-imgui-sample
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/assets/simple-shader.vs ${PROJECT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/assets/simple-shader.fs ${PROJECT_BINARY_DIR}
-)
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/assets/simple-shader.vs ${PROJECT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/assets/simple-shader.fs ${PROJECT_BINARY_DIR}
+        )
 
 target_compile_definitions(opengl-imgui-sample PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
 target_link_libraries(opengl-imgui-sample imgui::imgui GLEW::glew_s glfw::glfw fmt::fmt glm::glm)
