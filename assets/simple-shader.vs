@@ -20,10 +20,11 @@ void main()
    // rotated_pos.y = u_translation.y + in_position.x * sin(u_rotation) + in_position.y * cos(u_rotation);
 
     v_out.color = in_color;
+//    gl_Position = in_position;
     //gl_Position = vec4(rotated_pos.x, rotated_pos.y, in_position.z, 1.0);
     //gl_Position = u_mvp * vec4(rotated_pos.x, rotated_pos.y, in_position.z, 1.0);
 
     //gl_Position = u_mvp * vec4(3 * rotated_pos.x, 2 * rotated_pos.y, in_position.z, 1.0);
-    gl_Position =  u_mvp * vec4(in_position.xyz,  1.0);
+    gl_Position =  u_mvp * vec4(in_position.xyz, 1.0);
     //gl_Position /= gl_Position.w;
 }

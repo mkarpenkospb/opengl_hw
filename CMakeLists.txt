@@ -10,16 +10,20 @@ find_package(glfw CONFIG)
 find_package(glew CONFIG)
 find_package(fmt CONFIG)
 find_package(glm CONFIG)
+find_package(tinyobjloader CONFIG)
 
 
 add_executable(opengl-imgui-sample
                 main.cpp
+                utils.cpp
                 opengl_shader.cpp
                 opengl_shader.h
                 bindings/imgui_impl_glfw.cpp
                 bindings/imgui_impl_opengl3.cpp
+#                bindings/tiny_obj_loader.cpp
                 bindings/imgui_impl_glfw.h
                 bindings/imgui_impl_opengl3.h
+#                bindings/tiny_obj_loader.h
                 assets/simple-shader.vs
                 assets/simple-shader.fs )
 
@@ -29,5 +33,8 @@ add_custom_command(TARGET opengl-imgui-sample
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/assets/simple-shader.fs ${PROJECT_BINARY_DIR}
         )
 
-target_compile_definitions(opengl-imgui-sample PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
-target_link_libraries(opengl-imgui-sample imgui::imgui GLEW::glew_s glfw::glfw fmt::fmt glm::glm)
+target_compile_definitions(opengl-imgui-sample PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW )
+target_link_libraries(opengl-imgui-sample imgui::imgui GLEW::glew_s glfw::glfw fmt::fmt glm::glm tinyobjloader::tinyobjloader)
+
+#add_dependencies(opengl-imgui-sample imgui::imgui GLEW::glew_s glfw::glfw fmt::fmt glm::glm tinyobjloader::tinyobjloader)
+#target_link_libraries(opengl-imgui-sample imgui::imgui GLEW::glew_s glfw::glfw fmt::fmt glm::glm tinyobjloader::tinyobjloader)

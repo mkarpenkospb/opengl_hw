@@ -10,7 +10,7 @@
 #include "imgui.h"
 #include "bindings/imgui_impl_glfw.h"
 #include "bindings/imgui_impl_opengl3.h"
-
+#define TINYOBJLOADER_IMPLEMENTATION
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
 
@@ -19,17 +19,16 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+//#include "tiny_obj_loader.h"
 
 #include "opengl_shader.h"
+#include "utils.hpp"
 
 static void glfw_error_callback(int error, const char *description) {
     std::cerr << fmt::format("Glfw Error {}: {}\n", error, description);
 }
 
 // -------------- mouse variables --------------------------------------
-
-
-
 void mouseButtonCallback( GLFWwindow *window, int button, int action, int mods );
 void scrollCallback( GLFWwindow *window, double xoffset, double yoffset );
 
@@ -38,12 +37,12 @@ struct Texel {
 };
 
 Texel texturedata[] = {
-        {0x00, 0x00, 0x00, 0xFF}, //
-        {0x00, 0xbf, 0xff, 0xFF}, //
-        {0xcc, 0xdd, 0x00, 0xFF}, //
-        {0xcc, 0xdd, 0x00, 0xFF}, //
-        {0xcc, 0xdd, 0x00, 0xFF}, //
-        {0xFF, 0xFF, 0xFF, 0xFF}, //
+        {0x00, 0x00, 0x00, 0xFF},
+        {0x00, 0xbf, 0xff, 0xFF},
+        {0xcc, 0xdd, 0x00, 0xFF},
+        {0xcc, 0xdd, 0x00, 0xFF},
+        {0xcc, 0xdd, 0x00, 0xFF},
+        {0xFF, 0xFF, 0xFF, 0xFF},
 };
 
 unsigned int texturewidth = 6;
@@ -64,20 +63,20 @@ double x_start_pos = 0, y_start_pos = 0;
 void create_triangle(GLuint &vbo, GLuint &vao, GLuint &ebo) {
     // create the triangle
     float triangle_vertices[] = {
-            // 0.0f, 0.25f, 0.0f,	// position vertex 1
-            -1.0f, -1.0f, 0.0f,
-            1.0f, 0.4f, 0.2f,     // color vertex 1
+            -1, 1, 0,	// position vertex 1
+            0, 1, 0.0f,	 // color vertex 1
 
-            -1.0f, 1.0f, 0.0f,  // position vertex 1
-            0.9f, 1.0f, 0.5f,     // color vertex 1
+            -1, -1, 0.0f,  // position vertex 1
+            0, 0, 0.0f,	 // color vertex 1
 
-            1.0f, 1.0f, 0.0f, // position vertex 1
-            0.1f, 0.5f, 1.0f,
+            1, -1, 0.0f, // position vertex 1
+            1, 0, 0,	 // color vertex 1
 
-            1.0f, -1.0f, 0.0f, // position vertex 1
-            0.1f, 0.5f, 1.0f,
+            1, 1, 0.0f, // position vertex 1
+            1, 1, 0,	 // color vertex 1
     };
-    unsigned int triangle_indices[] = {0, 1, 2, 0, 2, 3};
+    unsigned int triangle_indices[] = {
+            0, 1, 2, 0, 3, 2 };
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
@@ -86,16 +85,77 @@ void create_triangle(GLuint &vbo, GLuint &vao, GLuint &ebo) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertices), triangle_vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangle_indices), triangle_indices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) (3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+//    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+//    glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
 
+
+void create_pear(GLuint &vbo, GLuint &vao, GLuint &ebo, unsigned int &vertex_num) {
+//    std::string inputfile = "../erato-1.obj";
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+
+    std::string warn;
+    std::string err;
+
+    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err,
+                                "../pear_export.obj", "../");
+
+    if (!warn.empty()) {
+        std::cout << warn << std::endl;
+    }
+
+    if (!err.empty()) {
+        std::cerr << err << std::endl;
+    }
+
+    if (!ret) {
+        exit(1);
+    }
+    unsigned int size = shapes[0].mesh.indices.size();
+
+    std::vector<unsigned int> vertex_indexes(size);
+    std::vector<unsigned int> normals_indexes(size);
+    std::vector<unsigned int> tex_indexes(size);
+    vertex_num = size;
+
+//    unsigned int normals_indexes[size];
+//    unsigned int tex_indexes[size];
+
+    get_vertex_array(vertex_indexes.data(), normals_indexes.data(), tex_indexes.data(), shapes[0]);
+
+    std::cout << "hoooh" << std::endl;
+
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * attrib.vertices.size(), attrib.vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * vertex_indexes.size(), vertex_indexes.data(),
+                 GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
+    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) (3 * sizeof(float)));
+//    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+
+
 int main(int, char **) {
+//    test_obj_read();
+//    GLuint vbo, vao, ebo;
+//    create_pear(vbo, vao, ebo);
+
     // Use GLFW to create a simple window
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -118,10 +178,10 @@ int main(int, char **) {
     glfwSwapInterval(1); // Enable vsync
     // ------------------------ mouse --------------------
 
-    glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
-    glfwSetMouseButtonCallback( window, mouseButtonCallback );
+//    glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+//    glfwSetMouseButtonCallback( window, mouseButtonCallback );
 //    glfwSetInputMode( window, GLFW_STICKY_MOUSE_BUTTONS, 1 );
-    glfwSetScrollCallback( window, scrollCallback );
+//    glfwSetScrollCallback( window, scrollCallback );
 
     // Initialize GLEW, i.e. fill all possible function pointers for current OpenGL context
     if (glewInit() != GLEW_OK) {
@@ -130,38 +190,36 @@ int main(int, char **) {
     }
 //   glfwMaximizeWindow(window);
     // create our geometries
+    unsigned int vertex_num = 0;
     GLuint vbo, vao, ebo;
-    create_triangle(vbo, vao, ebo);
+    create_pear(vbo, vao, ebo, vertex_num);
 
     // init shader
     shader_t triangle_shader("simple-shader.vs", "simple-shader.fs");
 
     // Setup GUI context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-    ImGui::StyleColorsDark();
+//    IMGUI_CHECKVERSION();
+//    ImGui::CreateContext();
+//    ImGuiIO &io = ImGui::GetIO();
+//    ImGui_ImplGlfw_InitForOpenGL(window, true);
+//    ImGui_ImplOpenGL3_Init(glsl_version);
+//    ImGui::StyleColorsDark();
 //    io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
 //    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     auto const start_time = std::chrono::steady_clock::now();
 
 //   glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_1D, texture);
-
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, texturewidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturedata);
-    glBindTexture(GL_TEXTURE_1D, 0);
-
-
-
+//    GLuint texture;
+//    glGenTextures(1, &texture);
+//    glBindTexture(GL_TEXTURE_1D, texture);
+//
+//    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, texturewidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturedata);
+//    glBindTexture(GL_TEXTURE_1D, 0);
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -174,85 +232,32 @@ int main(int, char **) {
         glViewport(0, 0, display_w, display_h);
 
         // Fill background with solid color
-        glClearColor(0.30f, 0.55f, 0.60f, 1.00f);
+        glClearColor(0.5f, 0.3f, 0.60f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Gui start new frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
 
-        // GUI
-        ImGui::Begin("Fractal options");
-        static int iteration = 600;
-        ImGui::InputInt("iteration", &iteration, 100);
 
-        static float rscale = 1;
-        ImGui::InputFloat("rscale", &rscale, 0.02);
-
-//        static float c_real = -0.70176;
-//        ImGui::InputFloat("real", &c_real);
-//
-//        static float c_img = -0.3842;
-//        ImGui::InputFloat("imgn", &c_img);
-
-        ImGui::End();
-
-        float const time_from_start = (float) (
-                std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start_time).count() /
-                1000.0);
-        triangle_shader.set_uniform("u_time", time_from_start);
-
-        triangle_shader.set_uniform("u_iteration", iteration);
-        triangle_shader.set_uniform("rscale", rscale);
-
-        static glm::vec2 const u_resolution = glm::vec2((float)width, (float)height);
-        triangle_shader.set_uniform("u_resolution", u_resolution[0], u_resolution[1]);
-
-        triangle_shader.set_uniform("c", c[0], c[1]);
-
-        triangle_shader.set_uniform("r", (float)r);
-
-        auto model = glm::rotate(glm::mat4(1), glm::radians((float) 0), glm::vec3(0, 1, 0));
-        auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 2, 0));
-        auto projection = glm::perspective<float>(100, 1, 0.1, 100);
+        auto model = glm::rotate(glm::mat4(1), 0.0f, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.4, 0.4, 0.4));
+        auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        auto projection = glm::perspective<float>(90, float(display_w) / display_h, 0.1, 100);
         auto mvp = projection * view * model;
-
+//        glm::mat4 identity(1.0);
+//        mvp = identity;
         triangle_shader.set_uniform("u_mvp", glm::value_ptr(mvp));
-
         // Bind triangle shader
         triangle_shader.use();
-        // ------------------------------------- texture --------------------------------------------------
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_1D, texture);
-        // ------------------------------------- mouse -----------------------------------------------
-        if (follow_mouse) {
-            glfwGetCursorPos(window, &xpos, &ypos);
-            double delta_x = (xpos - x_start_pos) / width * (x_up_right - x_down_left);
-            double delta_y = (ypos - y_start_pos) / height * (y_down_left - y_up_right);
-            x_start_pos = xpos;
-            y_start_pos = ypos;
-            x_down_left -= delta_x;
-            x_up_right -= delta_x;
-            y_down_left -= delta_y;
-            y_up_right -= delta_y;
-        }
 
-        triangle_shader.set_uniform("x_down_left", (float)(x_down_left));
-        triangle_shader.set_uniform("y_down_left", (float)(y_down_left));
-        triangle_shader.set_uniform("x_up_right", (float)(x_up_right));
-        triangle_shader.set_uniform("y_up_right", (float)(y_up_right));
         // Bind vertex array = buffers + indices
         glBindVertexArray(vao);
         // Execute draw call
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, vertex_num, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // Generate gui render commands
-        ImGui::Render();
-
-        // Execute gui render commands using OpenGL backend
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//        ImGui::Render();
+//
+//        // Execute gui render commands using OpenGL backend
+//        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Swap the backbuffer with the frontbuffer that is used for screen display
         glfwSwapBuffers(window);
@@ -265,7 +270,6 @@ int main(int, char **) {
 
     glfwDestroyWindow(window);
     glfwTerminate();
-
     return 0;
 }
 
@@ -300,5 +304,4 @@ void scrollCallback(GLFWwindow *window, double xoffset, double yoffset ) {
     x_up_right = x_up_right - difx * (1-x_prop);
     y_up_right = y_up_right + dify * y_prop;
     y_down_left = y_down_left - dify * (1-y_prop);
-
 }

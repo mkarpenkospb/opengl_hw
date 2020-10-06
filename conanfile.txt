@@ -4,9 +4,11 @@ glfw/3.3.2
 glew/2.1.0
 fmt/7.0.3
 glm/0.9.9.8
+tinyobjloader/1.0.6
 
 [generators]
 cmake_find_package_multi
+cmake
 
 [options]
 glew:shared=False
@@ -15,5 +17,7 @@ fmt:header_only=True
 [imports]
 ./res/bindings, imgui_impl_glfw.cpp -> ../bindings
 ./res/bindings, imgui_impl_opengl3.cpp -> ../bindings
+./res/bindings, tiny_obj_loader.cpp -> ../bindings
 ./res/bindings, imgui_impl_glfw.h -> ../bindings
 ./res/bindings, imgui_impl_opengl3.h -> ../bindings
+./res/bindings, tiny_obj_loader.h -> ../bindings
