@@ -15,13 +15,24 @@ uniform float u_time;
 // https://habr.com/ru/post/206516/
 // f(z) = z^2 + 0.285 + 0.01i
 
+in vec3 Normal;
+in vec2 tex_coord;
 
-
-uniform sampler1D myColors;
+uniform sampler2D u_tex;
 
 void main()
 {
-    o_frag_color = vec4(v_out.color.xy,0,1.0);
+//     o_frag_color = vec4(v_out.color.xy,0,1.0);
+    vec3 texture = texture(u_tex, tex_coord).rgb;
+
+    vec3 norm = normalize(Normal);
+    vec3 lightDir = normalize(vec3(-1, -1, -1) - gl_FragCoord.xyz);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * texture;
+
+//    vec3 result = (ambient + diffuse) * sphereColor;
+//    o_frag_color = vec4(diff, 1.0f);
+    o_frag_color = vec4(texture, 1.0f);
 //    vec2 f_coord = vec2((gl_FragCoord.x / u_resolution.x) * (x_up_right - x_down_left) + x_down_left,
 //                        (gl_FragCoord.y / u_resolution.y) * (y_down_left - y_up_right) + y_up_right) ;
 //

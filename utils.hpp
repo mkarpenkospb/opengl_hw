@@ -7,10 +7,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "tiny_obj_loader.h"
-
+#include <stb_image.h>
 
 void get_vertex_array(
-        unsigned int* vertex_indexes,
-        unsigned int* normals_indexes,
-        unsigned int* tex_indexes,
-        tinyobj::shape_t shape);
+        std::vector<unsigned int>& vertex_indexes,
+        std::vector<float>& vertex_data,
+        const tinyobj::shape_t& shape,
+        const tinyobj::attrib_t& attrib
+);
+
+unsigned int loadCubemap(const std::vector<std::string>& faces);
+
+
