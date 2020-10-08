@@ -115,7 +115,6 @@ void create_cube(GLuint &vbo, GLuint &vao, GLuint &ebo, unsigned int &vertex_num
 }
 
 void create_pear(GLuint &vbo, GLuint &vao, GLuint &ebo, unsigned int &vertex_num) {
-//    std::string inputfile = "../erato-1.obj";
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -280,10 +279,21 @@ int main(int, char **) {
         // GUI
 //        ImGui::Begin("Triangle Position/Color");
 //
-//        static float dx = 0.0;
-//        static float dy = 0.0;
-//        ImGui::SliderFloat("dx", &dx, 0, 40);
-//        ImGui::SliderFloat("dy", &dy, 0, 40);
+        // проверка что будет если менять точку зрения
+//        static float eyex = 0.0;
+//        static float eyey = 0.0;
+//        static float eyez = -1.0;
+//        ImGui::SliderFloat("eyex", &eyex, -1, 1);
+//        ImGui::SliderFloat("eyey", &eyey, -1, 1);
+//        ImGui::SliderFloat("eyez", &eyez, -1, 1);
+
+        static float delta_y = 0.0;
+        static float delta_x = 0.0;
+        static float delta_z = 0.0;
+        ImGui::SliderFloat("rotate along y", &delta_y, -6, 6);
+        ImGui::SliderFloat("rotate along x", &delta_x, -6, 6);
+        ImGui::SliderFloat("rotate along z", &delta_z, -6, 6);
+        // что будет если вращать по векторам x, y, z модели
 //
 //        ImGui::End();
 
@@ -297,24 +307,26 @@ int main(int, char **) {
         }
 
 
-        auto model = glm::mat4(1.0);
+        auto pear_model = glm::mat4(1.0) * glm::scale(glm::vec3(0.3 / scale , 0.3 / scale, 0.3 / scale));
+        auto cube_model = glm::mat4(1.0) * glm::scale(glm::vec3(20, 20, 20));
+
         auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
         view = glm::rotate(view, glm::radians( (float) delta_x * 60),  glm::vec3(0,1,0));
-        view = glm::rotate(view, glm::radians( (float) delta_y * 60), glm::vec3(view[0]));
+        view = glm::rotate(view, glm::radians( (float) delta_y * 60), normalize(glm::vec3(glm::inverse(view)[0])));
+//        view = glm::rotate(view, glm::radians( (float) delta_z * 60), glm::vec3(0,0,1));
 
         auto projection = glm::perspective<float>(90, float(display_w) / display_h, 0.1, 100);
-        auto pear_scale = glm::scale(glm::vec3(0.3 / scale , 0.3 / scale, 0.3 / scale));
-        auto mvp2 = projection * view * model;
+
         glm::mat4 identity(1.0);
-        auto pear_view =  view * pear_scale;
-        auto cameraPos = glm::vec3(glm::inverse(pear_view)[3]);
+
+        auto cameraPos = glm::vec3(glm::inverse(view)[3]);
 
         // use Cube shader
         glDepthMask(GL_FALSE);
         cube_shader.use();
         cube_shader.set_uniform("projection", glm::value_ptr(projection));
         cube_shader.set_uniform("view", glm::value_ptr(view));
-        cube_shader.set_uniform("u_mvp2", glm::value_ptr(mvp2));
+        cube_shader.set_uniform("model", glm::value_ptr(cube_model));
         glBindVertexArray(c_vao);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, cube_vertex_num);
@@ -324,8 +336,8 @@ int main(int, char **) {
 
         // Bind triangle shader
         triangle_shader.use();
-        triangle_shader.set_uniform("model", glm::value_ptr(model));
-        triangle_shader.set_uniform("view", glm::value_ptr(pear_view));
+        triangle_shader.set_uniform("model", glm::value_ptr(pear_model));
+        triangle_shader.set_uniform("view", glm::value_ptr(view));
         triangle_shader.set_uniform("projection", glm::value_ptr(projection));
         triangle_shader.set_uniform("cameraPos", glm::value_ptr(cameraPos));
         glActiveTexture(GL_TEXTURE0);
