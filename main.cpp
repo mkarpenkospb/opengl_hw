@@ -83,7 +83,7 @@ float skyboxVertices[] = {
         1.0f, -1.0f,  1.0f
 };
 
-int width = 1080;
+int width = 1920;
 int height = 1080;
 
 bool follow_mouse = false;
@@ -287,12 +287,12 @@ int main(int, char **) {
 //        ImGui::SliderFloat("eyey", &eyey, -1, 1);
 //        ImGui::SliderFloat("eyez", &eyez, -1, 1);
 
-        static float delta_y = 0.0;
-        static float delta_x = 0.0;
-        static float delta_z = 0.0;
-        ImGui::SliderFloat("rotate along y", &delta_y, -6, 6);
-        ImGui::SliderFloat("rotate along x", &delta_x, -6, 6);
-        ImGui::SliderFloat("rotate along z", &delta_z, -6, 6);
+//        static float delta_y = 0.0;
+//        static float delta_x = 0.0;
+//        static float delta_z = 0.0;
+//        ImGui::SliderFloat("rotate along y", &delta_y, -6, 6);
+//        ImGui::SliderFloat("rotate along x", &delta_x, -6, 6);
+//        ImGui::SliderFloat("rotate along z", &delta_z, -6, 6);
         // что будет если вращать по векторам x, y, z модели
 //
 //        ImGui::End();
@@ -307,7 +307,7 @@ int main(int, char **) {
         }
 
 
-        auto pear_model = glm::mat4(1.0) * glm::scale(glm::vec3(0.3 / scale , 0.3 / scale, 0.3 / scale));
+        auto pear_model = glm::mat4(1.0) * glm::scale(glm::vec3(0.2 / scale , 0.2 / scale, 0.2 / scale));
         auto cube_model = glm::mat4(1.0) * glm::scale(glm::vec3(20, 20, 20));
 
         auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
