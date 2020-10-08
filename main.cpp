@@ -307,14 +307,17 @@ int main(int, char **) {
         }
 
 
-        auto pear_model = glm::mat4(1.0) * glm::scale(glm::vec3(0.2 / scale , 0.2 / scale, 0.2 / scale));
-        auto cube_model = glm::mat4(1.0) * glm::scale(glm::vec3(20, 20, 20));
+
+
+        auto model = glm::mat4(1.0);
+        model = glm::rotate(model, glm::radians( (float) delta_x * 60),  glm::vec3(0,1,0));
+        model = glm::rotate(model, glm::radians( -(float) delta_y * 60), normalize(glm::vec3(glm::inverse(model)[0])));
+
+        auto pear_model = model * glm::scale(glm::vec3(0.2 / scale , 0.2 / scale, 0.2 / scale));
+        auto cube_model = model;
 
         auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-        view = glm::rotate(view, glm::radians( (float) delta_x * 60),  glm::vec3(0,1,0));
-        // !!!!!!!!!!!!!!!! glm::inverse(view)[0] -- это чтобы всегда вращалась на нас
-        view = glm::rotate(view, glm::radians( (float) delta_y * 60), normalize(glm::vec3(glm::inverse(view)[0])));
-//        view = glm::rotate(view, glm::radians( (float) delta_z * 60), glm::vec3(0,0,1));
+
 
         auto projection = glm::perspective<float>(90, float(display_w) / display_h, 0.1, 100);
 
