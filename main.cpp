@@ -241,12 +241,12 @@ int main(int, char **) {
 
     std::vector<std::string> faces =
     {
-        "../mountain-skyboxes/Maskonaive/posx.jpg",
-        "../mountain-skyboxes/Maskonaive/negx.jpg",
-        "../mountain-skyboxes/Maskonaive/posy.jpg",
-        "../mountain-skyboxes/Maskonaive/negy.jpg",
-        "../mountain-skyboxes/Maskonaive/posz.jpg",
-        "../mountain-skyboxes/Maskonaive/negz.jpg"
+        "../mountain-skyboxes/Teide/posx.jpg",
+        "../mountain-skyboxes/Teide/negx.jpg",
+        "../mountain-skyboxes/Teide/posy.jpg",
+        "../mountain-skyboxes/Teide/negy.jpg",
+        "../mountain-skyboxes/Teide/posz.jpg",
+        "../mountain-skyboxes/Teide/negz.jpg"
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
@@ -312,6 +312,7 @@ int main(int, char **) {
 
         auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
         view = glm::rotate(view, glm::radians( (float) delta_x * 60),  glm::vec3(0,1,0));
+        // !!!!!!!!!!!!!!!! glm::inverse(view)[0] -- это чтобы всегда вращалась на нас
         view = glm::rotate(view, glm::radians( (float) delta_y * 60), normalize(glm::vec3(glm::inverse(view)[0])));
 //        view = glm::rotate(view, glm::radians( (float) delta_z * 60), glm::vec3(0,0,1));
 
