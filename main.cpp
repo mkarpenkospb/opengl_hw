@@ -90,6 +90,7 @@ bool follow_mouse = false;
 double x_start_pos = 0, y_start_pos = 0, xpos = 0, ypos = 0;
 double delta_x = 0;
 double delta_y = 0;
+double y_offset = 0, scale_base = 9.0 / 10, scale = 1;
 
 void create_cube(GLuint &vbo, GLuint &vao, GLuint &ebo, unsigned int &vertex_num) {
 
@@ -257,7 +258,7 @@ int main(int, char **) {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
     ImGui::StyleColorsDark();
-
+//    auto const start_time = std::chrono::steady_clock::now();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -277,14 +278,14 @@ int main(int, char **) {
         ImGui::NewFrame();
 
         // GUI
-        ImGui::Begin("Triangle Position/Color");
-        static float rotation_x = 0.0;
-        static float rotation_y = 0.0;
-        static float rotation_z = 0.0;
-        ImGui::SliderFloat("rotation_x", &rotation_x, 0, 2 * glm::pi<float>());
-        ImGui::SliderFloat("rotation_y", &rotation_y, 0, 2 * glm::pi<float>());
-        ImGui::SliderFloat("rotation_z", &rotation_z, 0, 2 * glm::pi<float>());
-        ImGui::End();
+//        ImGui::Begin("Triangle Position/Color");
+//
+//        static float dx = 0.0;
+//        static float dy = 0.0;
+//        ImGui::SliderFloat("dx", &dx, 0, 40);
+//        ImGui::SliderFloat("dy", &dy, 0, 40);
+//
+//        ImGui::End();
 
 
         if (follow_mouse) {
@@ -296,14 +297,17 @@ int main(int, char **) {
         }
 
 
-        auto model = glm::rotate(glm::mat4(1), glm::radians( (float) delta_x * 60), glm::vec3(0, 1, 0));
-        model = glm::rotate(model, glm::radians( -(float) delta_y * 60), glm::vec3(1, 0, 0));
-        model = glm::rotate(model, glm::radians(rotation_z * 60), glm::vec3(0, 0, 1));
+        auto model = glm::mat4(1.0);
         auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        view = glm::rotate(view, glm::radians( (float) delta_x * 60),  glm::vec3(0,1,0));
+        view = glm::rotate(view, glm::radians( (float) delta_y * 60), glm::vec3(view[0]));
+
         auto projection = glm::perspective<float>(90, float(display_w) / display_h, 0.1, 100);
-        auto mvp2 = projection * view * model ;
+        auto pear_scale = glm::scale(glm::vec3(0.3 / scale , 0.3 / scale, 0.3 / scale));
+        auto mvp2 = projection * view * model;
         glm::mat4 identity(1.0);
-        auto mvp = mvp2 * glm::scale(glm::vec3(0.3, 0.3, 0.3));
+        auto pear_view =  view * pear_scale;
+        auto cameraPos = glm::vec3(glm::inverse(pear_view)[3]);
 
         // use Cube shader
         glDepthMask(GL_FALSE);
@@ -320,7 +324,10 @@ int main(int, char **) {
 
         // Bind triangle shader
         triangle_shader.use();
-        triangle_shader.set_uniform("u_mvp", glm::value_ptr(mvp));
+        triangle_shader.set_uniform("model", glm::value_ptr(model));
+        triangle_shader.set_uniform("view", glm::value_ptr(pear_view));
+        triangle_shader.set_uniform("projection", glm::value_ptr(projection));
+        triangle_shader.set_uniform("cameraPos", glm::value_ptr(cameraPos));
         glActiveTexture(GL_TEXTURE0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -365,17 +372,6 @@ void mouseButtonCallback( GLFWwindow *window, int button, int action, int mods )
 
 
 void scrollCallback(GLFWwindow *window, double xoffset, double yoffset ) {
-//    y_offset = yoffset;
-//    scale = std::pow(scale_base, y_offset);
-//    glfwGetCursorPos(window, &xpos, &ypos);
-//    double x_prop = xpos / width;
-//    double y_prop = ypos / height;
-//    double new_width = (x_up_right - x_down_left) * scale;
-//    double new_height = (y_down_left - y_up_right) * scale;
-//    double difx = (x_up_right - x_down_left) - new_width;
-//    double dify = (y_down_left - y_up_right) - new_height;
-//    x_down_left = x_down_left + difx * x_prop;
-//    x_up_right = x_up_right - difx * (1-x_prop);
-//    y_up_right = y_up_right + dify * y_prop;
-//    y_down_left = y_down_left - dify * (1-y_prop);
+    y_offset = yoffset;
+    scale *= std::pow(scale_base, y_offset);
 }
