@@ -289,8 +289,10 @@ int main(int, char **) {
 
         static float n_air = 1;
         static float n_pear = 1.1;
+        static float a = 0;
         ImGui::SliderFloat("n_air", &n_air, 1, 10);
         ImGui::SliderFloat("n_pear", &n_pear, 1, 10);
+        ImGui::SliderFloat("texture", &a, 0, 1);
 
 
 //        static float delta_y = 0.0;
@@ -353,6 +355,7 @@ int main(int, char **) {
         triangle_shader.set_uniform("cameraPos", cameraPos.x, cameraPos.y, cameraPos.z);
         triangle_shader.set_uniform("n_to", n_pear);
         triangle_shader.set_uniform("n_from", n_air);
+        triangle_shader.set_uniform("a", a);
         glActiveTexture(GL_TEXTURE0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
