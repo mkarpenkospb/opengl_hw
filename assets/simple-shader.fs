@@ -22,7 +22,7 @@ uniform float n_from; // воздух
 uniform float n_to; //
 uniform float a;
 
-//https://habr.com/ru/post/347750/
+
 void main()
 {
 
