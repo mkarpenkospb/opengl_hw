@@ -18,4 +18,8 @@ void get_vertex_array(
 
 unsigned int loadCubemap(const std::vector<std::string>& faces);
 
+void create_pear(GLuint &vbo, GLuint &vao, GLuint &ebo, unsigned int &vertex_num);
 
+void create_cube(GLuint &vbo, GLuint &vao, GLuint &ebo, unsigned int &vertex_num);
+
+void load_image(GLuint & texture);

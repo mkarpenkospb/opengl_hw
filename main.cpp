@@ -33,56 +33,6 @@ static void glfw_error_callback(int error, const char *description) {
 void mouseButtonCallback( GLFWwindow *window, int button, int action, int mods );
 void scrollCallback( GLFWwindow *window, double xoffset, double yoffset );
 
-struct Texel {
-    unsigned char r, g, b, a;
-};
-
-// https://learnopengl.com/code_viewer.php?code=advanced/cubemaps_skybox_data
-float skyboxVertices[] = {
-        // positions
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        -1.0f,  1.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-        1.0f, -1.0f,  1.0f
-};
-
 int width = 1920;
 int height = 1080;
 
@@ -91,102 +41,6 @@ double x_start_pos = 0, y_start_pos = 0, xpos = 0, ypos = 0;
 double delta_x = 0;
 double delta_y = 0;
 double y_offset = 0, scale_base = 9.0 / 10, scale = 1;
-
-void create_cube(GLuint &vbo, GLuint &vao, GLuint &ebo, unsigned int &vertex_num) {
-
-    unsigned int triangle_indices[36]{};
-    for (int i = 0 ; i < 36; ++i) {
-        triangle_indices[i] = i;
-    }
-    vertex_num = 36;
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangle_indices), triangle_indices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void create_pear(GLuint &vbo, GLuint &vao, GLuint &ebo, unsigned int &vertex_num) {
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-
-    std::string warn;
-    std::string err;
-
-    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err,
-                                "../pear_export.obj", "../");
-
-    if (!warn.empty()) {
-        std::cout << warn << std::endl;
-    }
-
-    if (!err.empty()) {
-        std::cerr << err << std::endl;
-    }
-
-    if (!ret) {
-        exit(1);
-    }
-    unsigned int size = shapes[0].mesh.indices.size();
-
-    std::vector<float> vertex_attributes_data; // # вершин * (pos + normals + textures)
-    std::vector<unsigned int> vertex_indexes;
-    vertex_num = size;
-
-    get_vertex_array(vertex_indexes, vertex_attributes_data, shapes[0], attrib);
-
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertex_attributes_data.size(), vertex_attributes_data.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * vertex_indexes.size(), vertex_indexes.data(),
-                 GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, (3 + 3 + 2) * sizeof(float), (void *) 0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, (3 + 3 + 2) * sizeof(float), (void *) (3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, (3 + 3 + 2) * sizeof(float), (void *) (6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void load_image(GLuint & texture)
-{
-    int width, height, channels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char *image = stbi_load("../pear_diffuse.jpg",
-                                     &width,
-                                     &height,
-                                     &channels,
-                                     STBI_rgb);
-
-    std::cout << "width: " << width << ", height: "<< height << ", channels: " << channels;
-
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(image);
-}
 
 int main(int, char **) {
 
@@ -276,16 +130,6 @@ int main(int, char **) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // GUI
-//        ImGui::Begin("Triangle Position/Color");
-//
-        // проверка что будет если менять точку зрения
-//        static float eyex = 0.0;
-//        static float eyey = 0.0;
-//        static float eyez = -1.0;
-//        ImGui::SliderFloat("eyex", &eyex, -1, 1);
-//        ImGui::SliderFloat("eyey", &eyey, -1, 1);
-//        ImGui::SliderFloat("eyez", &eyez, -1, 1);
 
         static float n_air = 1;
         static float n_pear = 1.1;
@@ -293,17 +137,6 @@ int main(int, char **) {
         ImGui::SliderFloat("n_air", &n_air, 1, 10);
         ImGui::SliderFloat("n_pear", &n_pear, 1, 10);
         ImGui::SliderFloat("texture", &a, 0, 1);
-
-
-//        static float delta_y = 0.0;
-//        static float delta_x = 0.0;
-//        static float delta_z = 0.0;
-//        ImGui::SliderFloat("rotate along y", &delta_y, -6, 6);
-//        ImGui::SliderFloat("rotate along x", &delta_x, -6, 6);
-//        ImGui::SliderFloat("rotate along z", &delta_z, -6, 6);
-        // что будет если вращать по векторам x, y, z модели
-//
-//        ImGui::End();
 
 
         if (follow_mouse) {
@@ -316,8 +149,6 @@ int main(int, char **) {
 
 
         auto model = glm::mat4(1.0);
-//        model = glm::rotate(model, glm::radians( (float) delta_x * 60),  glm::vec3(0,1,0));
-//        model = glm::rotate(model, glm::radians( -(float) delta_y * 60), normalize(glm::vec3(glm::inverse(model)[0])));
 
         auto pear_model = model * glm::scale(glm::vec3(0.2 / scale , 0.2 / scale, 0.2 / scale));
         auto cube_model = model;
@@ -325,7 +156,6 @@ int main(int, char **) {
         auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
         view = glm::rotate(view, glm::radians((float) delta_x * 60),  glm::vec3(0,1,0));
         view = glm::rotate(view, glm::radians((float) delta_y * 60), normalize(glm::vec3(glm::inverse(view)[0])));
-
 
         auto projection = glm::perspective<float>(90, float(display_w) / display_h, 0.1, 100);
 
