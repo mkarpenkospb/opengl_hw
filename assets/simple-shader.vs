@@ -16,8 +16,8 @@ uniform mat4 projection;
 //https://habr.com/ru/post/347750/
 void main()
 {
-    Normal = mat3(transpose(inverse(view))) * in_normal;
-    Position = vec3(model * vec4(in_position, 1.0));
+    Normal = normalize(mat3(transpose(inverse(model))) * in_normal);
+    Position = vec3(model * vec4(in_position, 1.0)); // not screen position
     tex_coord = in_texcoord;
     gl_Position = projection * view * model * vec4(in_position.xyz, 1.0);
 }

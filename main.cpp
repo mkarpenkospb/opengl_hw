@@ -287,6 +287,12 @@ int main(int, char **) {
 //        ImGui::SliderFloat("eyey", &eyey, -1, 1);
 //        ImGui::SliderFloat("eyez", &eyez, -1, 1);
 
+        static float n_air = 1;
+        static float n_pear = 1.1;
+        ImGui::SliderFloat("n_air", &n_air, 1, 10);
+        ImGui::SliderFloat("n_pear", &n_pear, 1, 10);
+
+
 //        static float delta_y = 0.0;
 //        static float delta_x = 0.0;
 //        static float delta_z = 0.0;
@@ -307,16 +313,16 @@ int main(int, char **) {
         }
 
 
-
-
         auto model = glm::mat4(1.0);
-        model = glm::rotate(model, glm::radians( (float) delta_x * 60),  glm::vec3(0,1,0));
-        model = glm::rotate(model, glm::radians( -(float) delta_y * 60), normalize(glm::vec3(glm::inverse(model)[0])));
+//        model = glm::rotate(model, glm::radians( (float) delta_x * 60),  glm::vec3(0,1,0));
+//        model = glm::rotate(model, glm::radians( -(float) delta_y * 60), normalize(glm::vec3(glm::inverse(model)[0])));
 
         auto pear_model = model * glm::scale(glm::vec3(0.2 / scale , 0.2 / scale, 0.2 / scale));
         auto cube_model = model;
 
         auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        view = glm::rotate(view, glm::radians((float) delta_x * 60),  glm::vec3(0,1,0));
+        view = glm::rotate(view, glm::radians((float) delta_y * 60), normalize(glm::vec3(glm::inverse(view)[0])));
 
 
         auto projection = glm::perspective<float>(90, float(display_w) / display_h, 0.1, 100);
@@ -331,6 +337,7 @@ int main(int, char **) {
         cube_shader.set_uniform("projection", glm::value_ptr(projection));
         cube_shader.set_uniform("view", glm::value_ptr(view));
         cube_shader.set_uniform("model", glm::value_ptr(cube_model));
+
         glBindVertexArray(c_vao);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, cube_vertex_num);
@@ -343,7 +350,9 @@ int main(int, char **) {
         triangle_shader.set_uniform("model", glm::value_ptr(pear_model));
         triangle_shader.set_uniform("view", glm::value_ptr(view));
         triangle_shader.set_uniform("projection", glm::value_ptr(projection));
-        triangle_shader.set_uniform("cameraPos", glm::value_ptr(cameraPos));
+        triangle_shader.set_uniform("cameraPos", cameraPos.x, cameraPos.y, cameraPos.z);
+        triangle_shader.set_uniform("n_to", n_pear);
+        triangle_shader.set_uniform("n_from", n_air);
         glActiveTexture(GL_TEXTURE0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
