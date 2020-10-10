@@ -133,7 +133,7 @@ int main(int, char **) {
 
         static float n_air = 1;
         static float n_pear = 1.1;
-        static float a = 0;
+        static float a = 0.4;
         ImGui::SliderFloat("n_air", &n_air, 1, 10);
         ImGui::SliderFloat("n_pear", &n_pear, 1, 10);
         ImGui::SliderFloat("texture", &a, 0, 1);
