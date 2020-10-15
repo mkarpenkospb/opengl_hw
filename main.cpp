@@ -43,7 +43,7 @@ double delta_y = 0;
 double y_offset = 0, scale_base = 9.0 / 10, scale = 1;
 
 int main(int, char **) {
-
+    GLenum err;
     // Use GLFW to create a simple window
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -103,7 +103,9 @@ int main(int, char **) {
         "../mountain-skyboxes/Teide/negz.jpg"
     };
     unsigned int cubemapTexture = loadCubemap(faces);
-
+    while((err = glGetError()) != GL_NO_ERROR) {
+        std::cerr << gluErrorString(err) << std::endl;
+    }
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -114,6 +116,13 @@ int main(int, char **) {
 //    auto const start_time = std::chrono::steady_clock::now();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
+
+
+        while((err = glGetError()) != GL_NO_ERROR) {
+            std::cerr << gluErrorString(err) << std::endl;
+        }
+
 
         // Get windows size
         int display_w, display_h;
