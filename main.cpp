@@ -192,6 +192,8 @@ int main(int, char **) {
         triangle_shader.set_uniform("n_to", n_pear);
         triangle_shader.set_uniform("n_from", n_air);
         triangle_shader.set_uniform("a", a);
+        triangle_shader.set_uniform("u_tex", 0);
+        triangle_shader.set_uniform("skybox", 1);
         glActiveTexture(GL_TEXTURE1);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
