@@ -117,13 +117,10 @@ int main(int, char **) {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-
-
         while((err = glGetError()) != GL_NO_ERROR) {
             std::cerr << gluErrorString(err) << std::endl;
         }
-
-
+        
         // Get windows size
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -195,7 +192,7 @@ int main(int, char **) {
         triangle_shader.set_uniform("n_to", n_pear);
         triangle_shader.set_uniform("n_from", n_air);
         triangle_shader.set_uniform("a", a);
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE1);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, texture);
